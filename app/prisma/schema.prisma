@@ -1,78 +1,85 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"  // Or another database provider (e.g., mysql, sqlite)
+  url      = env("DATABASE_URL")  // Make sure you have this variable set in your .env file
 }
 
 model User {
   id        String     @id @default(uuid())
   name      String?
-  email     String   @unique
+  email     String     @unique
   password  String
   active    Boolean
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  role      Role       @default(USER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 
-  // Relation to groups the user is part of
-  groups    Group[]  @relation("GroupMembers")
+  // Relations to groups the user is part of
+  groups        Group[]  @relation("GroupMembers")
+  blockedGroups Group[]  @relation("BlockedGroups")
 
-  // Relation to groups where the user has blocked other users
-  blockedGroups Group[] @relation("BlockedGroups")
+  // Relations for messages
+  sentMessages  message[] @relation("MessageFrom")
+  receivedMessages message[] @relation("MessageTo")
+
+  // Relation to admin in Group
+  managedGroups Group[] @relation("AdminGroup")
 }
 
 model Group {
-  id          String   @id @default(uuid())
+  id          String     @id @default(uuid())
   name        String
   description String?
   adminId     String
-  admin       User     @relation(fields: [adminId], references: [id])
+  admin       User       @relation("AdminGroup", fields: [adminId], references: [id])
 
   // Members of the group
-  members     User[]   @relation("GroupMembers")
+  members     User[]     @relation("GroupMembers")
 
   // Blocked users in the group
-  blocked     User[]   @relation("BlockedGroups")
+  blocked     User[]     @relation("BlockedGroups")
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  // Add this field for the reverse relation
+  messages    message[]  @relation("GroupMessages")
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 }
 
-
 model message {
-  fromId  String
-  toId    String? 
-  from  User    @relation(fields : [fromId],references : [id])
-  to  User    @relation(fields : [toId],references : [id])
-  message  String
+  id        String   @id @default(uuid())
+  fromId    String
+  toId      String?
+  from      User     @relation("MessageFrom", fields: [fromId], references: [id])
+  to        User?    @relation("MessageTo", fields: [toId], references: [id])
+  message   String
   groupId   String?
-  group     Group?    @relation(fields: [groupId], references: [id])
-  group_msg Boolean
-  Status  msgStatus @default('PENDING')
+  group     Group?   @relation("GroupMessages", fields: [groupId], references: [id])
+  groupMsg  Boolean
+  Status    msgStatus @default(PENDING)
   public    Boolean
   createdAt DateTime
 }
 
-model groupInvite{
-  
+model groupInvite {
+  id        String   @id @default(uuid()) 
+  userId    String
+  groupId   String
+  invitedAt DateTime @default(now())
+
+  @@unique([userId, groupId])
 }
 
-enum msgStatus{
+enum msgStatus {
   PENDING
   SENT
   READ
 }
 
-enum Role{
+enum Role {
   USER
   ADMIN
 }

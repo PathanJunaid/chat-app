@@ -82,7 +82,8 @@ export const initPassport = (): void => {
 export const createUserTokens = (user: Omit<IUser, "password">) => {
   const jwtSecret = process.env.JWT_SECRET ?? "";
   const token = jwt.sign(user, jwtSecret);
-  return { accessToken: token, refreshToken: "" };
+  const refreshToken = jwt.sign(user.id,jwtSecret);
+  return { accessToken: token, refreshToken: refreshToken };
 };
 
 export const decodeToken = (token: string) => {

@@ -1,15 +1,10 @@
-import { getSocket } from './chat.socket'
+import express from 'express';
+import groupRoutes from './chat.group.routes';
 
-export const emitMessage = (event: string, message: any) => {
-  const io = getSocket();
-  io?.on('connection',(socket)=>{
-    console.log(socket);
-  })
-  if (io) {
-    // Emit an event to all connected clients
-    io.emit(event, message);
-  }
-  io?.on('chat',(msg)=>{
-    console.log(msg);
-  })
-};
+const chatRoutes = express.Router();
+chatRoutes.use('/group',groupRoutes)
+
+chatRoutes
+    .post('')
+
+export default chatRoutes;

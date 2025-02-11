@@ -1,6 +1,6 @@
 
 import asyncHandler from "express-async-handler";
-import { type Request, type Response } from 'express'
+import { NextFunction, type Request, type Response } from 'express'
 import { createUserTokens } from "../services/passport-jwt.service";
 
 export const loginUser = asyncHandler(async(req :Request,res:Response)=>{
@@ -45,4 +45,8 @@ export const logoutUser= asyncHandler(async(req:Request,res:Response)=>{
     sameSite: 'strict',
   });
   res.json({ message: "Logout successfully", user: {  } });
+});
+export const authverify= asyncHandler(async (req:Request, res: Response, next: NextFunction)=>{
+  console.log(req);
+  next();
 })

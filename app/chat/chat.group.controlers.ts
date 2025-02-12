@@ -4,7 +4,6 @@ import * as chatServices from "./chat.services";
 import * as chatDb from '../prisma/prisma'
 import { createResponse } from "../common/helper/response.hepler";
 import { IGroup } from "./chat.dto";
-import { check } from "express-validator";
 
 export const createGroup = asyncHandler(async(req:Request, res:Response)=>{
     const token = req.cookies['access_token'];

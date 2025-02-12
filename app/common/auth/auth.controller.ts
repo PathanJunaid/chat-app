@@ -2,6 +2,7 @@
 import asyncHandler from "express-async-handler";
 import { NextFunction, type Request, type Response } from 'express'
 import { createUserTokens } from "../services/passport-jwt.service";
+import * as chatServices from "../../chat/chat.services";
 
 export const loginUser = asyncHandler(async(req :Request,res:Response)=>{
     // If authentication is successful, create JWT tokens
@@ -47,6 +48,15 @@ export const logoutUser= asyncHandler(async(req:Request,res:Response)=>{
   res.json({ message: "Logout successfully", user: {  } });
 });
 export const authverify= asyncHandler(async (req:Request, res: Response, next: NextFunction)=>{
-  console.log(req);
+  const token = req.cookies['access_token'];
+  const user = await chatServices.getAdmin(token);
+  if(!user){
+    res.send({
+      data:[],
+      msg: "please login",
+      success : false
+    })
+    return;
+  }
   next();
 })

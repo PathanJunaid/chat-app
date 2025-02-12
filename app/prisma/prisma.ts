@@ -97,9 +97,23 @@ export const createGroup = async (data: IGroup, adminId: string) => {
 export const getGroups = async (adminId: string) => {
     const result = await Client.group.findMany({
         where: {
-            adminId: adminId
-        }
-    })
+            OR: [
+                {
+                    adminId: adminId, // Check if user is the admin
+                },
+                {
+                    private: false, // Check if the group is public
+                    members: {
+                        some: { id: adminId }, // Check if the user is a member
+                    },
+                },
+            ],
+        },
+        include: {
+            admin: true, // Include admin details (if needed)
+            members: true, // Include members of the group (if needed)
+        },
+    });
     return result;
 }
 export const checkmember = async (groupId: string, memberId: string) => {

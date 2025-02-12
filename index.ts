@@ -8,6 +8,7 @@ import { type IUser } from "./app/user/user.dto";
 import errorHandler from "./app/common/middleware/error-handler.middleware";
 import routes from "./app/routes";
 import cookieParser from 'cookie-parser';
+import { setupSwagger } from './app/common/config/swagger.config';
 
 loadConfig();
 
@@ -38,6 +39,9 @@ const initApp = async (): Promise<void> => {
 
   // set base path to /api
   app.use("/api", routes);
+
+  // Swagger Setup (API Documentation)
+  setupSwagger(app); // Integrate Swagger UI
 
   app.get("/", (req: Request, res: Response) => {
     res.send({ status: "ok" });

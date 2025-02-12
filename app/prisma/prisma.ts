@@ -49,6 +49,7 @@ export const getUserByEmail = async (email: string) => {
 
 // chat functions 
 export const sendmsg = async (senderEmail: string, recieverEmail: string, msg: string) => {
+    console.log(recieverEmail,senderEmail)
     const result = await Client.message.create({
         data: {
             message: msg,
@@ -204,6 +205,7 @@ export const addsingleusertoGroup = async (groupId: string, userId: string) => {
     const user = await Client.user.findUnique({
         where: { id: userId },
     });
+    console.log(groupId,userId);
     if (!user) {
         console.error("User not found");
         return;

@@ -17,17 +17,17 @@ model User {
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
 
-  // Relations to groups the user is part of
-  groups        Group[]  @relation("GroupMembers")
-  blockedGroups Group[]  @relation("BlockedGroups")
-
   // Relations for messages
   sentMessages  message[] @relation("MessageFrom")
   receivedMessages message[] @relation("MessageTo")
 
-  // Relation to admin in Group
-  managedGroups Group[] @relation("AdminGroup")
+  // Relation to Group (admin of the group)
+  adminGroups Group[] @relation("AdminGroup")
+  // Many-to-many relation with Group (groups the user belongs to)
+  groups       Group[]  @relation("GroupMembers")
+  sentMessage groupMessage[] @relation("MessageFrom")
 }
+
 
 model Group {
   id          String     @id @default(uuid())
@@ -35,33 +35,35 @@ model Group {
   description String?
   adminId     String
   admin       User       @relation("AdminGroup", fields: [adminId], references: [id])
-
-  // Members of the group
-  members     User[]     @relation("GroupMembers")
-
-  // Blocked users in the group
-  blocked     User[]     @relation("BlockedGroups")
-
-  // Add this field for the reverse relation
-  messages    message[]  @relation("GroupMessages")
-
+  private     Boolean     @default(false)
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
+  // Define the opposite relation for `groupMessage`
+  groupMessages groupMessage[] @relation("MessageTo")
+
+  // Many-to-many relation with User (members of the group)
+  members     User[]     @relation("GroupMembers")
 }
 
 model message {
   id        String   @id @default(uuid())
-  fromId    String
-  toId      String?
-  from      User     @relation("MessageFrom", fields: [fromId], references: [id])
-  to        User?    @relation("MessageTo", fields: [toId], references: [id])
+  fromEmail    String
+  toEmail      String?
+  from      User     @relation("MessageFrom", fields: [fromEmail], references: [email])
+  to        User?    @relation("MessageTo", fields: [toEmail], references: [email])
   message   String
-  groupId   String?
-  group     Group?   @relation("GroupMessages", fields: [groupId], references: [id])
-  groupMsg  Boolean
   Status    msgStatus @default(PENDING)
-  public    Boolean
-  createdAt DateTime
+  createdAt DateTime  @default(now())
+}
+
+model groupMessage {
+  id        String   @id @default(uuid())
+  fromId    String
+  toId      String
+  from      User     @relation("MessageFrom", fields: [fromId], references: [id])
+  to        Group?   @relation("MessageTo", fields: [toId], references: [id])
+  message   String
+  createdAt DateTime @default(now())
 }
 
 model groupInvite {

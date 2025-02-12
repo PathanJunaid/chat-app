@@ -7,7 +7,7 @@ import { loadConfig } from "./app/common/helper/config.hepler";
 import { type IUser } from "./app/user/user.dto";
 import errorHandler from "./app/common/middleware/error-handler.middleware";
 import routes from "./app/routes";
-import { setupSocket } from "./app/chat/chat.socket";
+import cookieParser from 'cookie-parser';
 
 loadConfig();
 
@@ -29,6 +29,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(cookieParser())
 
 const initApp = async (): Promise<void> => {
 
@@ -48,8 +49,6 @@ const initApp = async (): Promise<void> => {
   app.use(errorHandler);
 
   const server = http.createServer(app);
-
-  setupSocket(server)
 
 
   server.listen(port, () => {
